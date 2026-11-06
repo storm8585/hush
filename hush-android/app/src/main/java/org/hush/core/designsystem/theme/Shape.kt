@@ -24,19 +24,8 @@ val HushShapes = Shapes(
     extraLarge = RoundedCornerShape(ShapeCornerExtraLarge)
 )
 
-val OutgoingBubbleShape = RoundedCornerShape(
-    topStart = ShapeCornerLargeIncreased,
-    topEnd = ShapeCornerLargeIncreased,
-    bottomStart = ShapeCornerLargeIncreased,
-    bottomEnd = ShapeCornerExtraSmall
-)
-
-val IncomingBubbleShape = RoundedCornerShape(
-    topStart = ShapeCornerLargeIncreased,
-    topEnd = ShapeCornerLargeIncreased,
-    bottomStart = ShapeCornerExtraSmall,
-    bottomEnd = ShapeCornerLargeIncreased
-)
+val OutgoingBubbleShape = RoundedCornerShape(ShapeCornerLargeIncreased)
+val IncomingBubbleShape = RoundedCornerShape(ShapeCornerLargeIncreased)
 
 val InputContainerShape = RoundedCornerShape(ShapeCornerExtraLargeIncreased)
 val DateChipShape = RoundedCornerShape(ShapeCornerMedium)

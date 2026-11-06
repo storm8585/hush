@@ -21,35 +21,35 @@ class ChatViewModel : ViewModel() {
                 ChatMessageUiModel(
                     id = "m1",
                     text = "Hey there! Have you reviewed the new Material 3 Expressive guidelines?",
-                    timestamp = "10:42 AM",
+                    timestamp = "10:42",
                     isOutgoing = false,
                     status = MessageDeliveryStatus.Read
                 ),
                 ChatMessageUiModel(
                     id = "m2",
                     text = "Yes, absolutely! The new spring motion and tonal container elevations are fantastic.",
-                    timestamp = "10:44 AM",
+                    timestamp = "10:44",
                     isOutgoing = true,
                     status = MessageDeliveryStatus.Read
                 ),
                 ChatMessageUiModel(
                     id = "m3",
                     text = "The 8dp spacing system makes responsive multi-window layouts so much cleaner.",
-                    timestamp = "10:45 AM",
+                    timestamp = "10:45",
                     isOutgoing = true,
                     status = MessageDeliveryStatus.Read
                 ),
                 ChatMessageUiModel(
                     id = "m4",
                     text = "Agreed! Are we applying the violet-purple theme palette across our chat screens?",
-                    timestamp = "10:48 AM",
+                    timestamp = "10:48",
                     isOutgoing = false,
                     status = MessageDeliveryStatus.Read
                 ),
                 ChatMessageUiModel(
                     id = "m5",
                     text = "Working on it right now. Pure light theme, pristine token pairing, and zero clutter.",
-                    timestamp = "10:50 AM",
+                    timestamp = "10:50",
                     isOutgoing = true,
                     status = MessageDeliveryStatus.Delivered
                 )
@@ -79,7 +79,7 @@ class ChatViewModel : ViewModel() {
         val currentText = _uiState.value.inputText.trim()
         if (currentText.isEmpty()) return
 
-        val currentTime = SimpleDateFormat("h:mm a", Locale.US).format(Date())
+        val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
         val newMessage = ChatMessageUiModel(
             id = UUID.randomUUID().toString(),
             text = currentText,

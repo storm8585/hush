@@ -9,6 +9,7 @@ build/
 .externalNativeBuild
 .cxx
 local.properties
+*.apk
 
 material-3-skill/
 android-skills/

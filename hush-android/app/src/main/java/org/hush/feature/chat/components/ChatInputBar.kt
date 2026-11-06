@@ -1,11 +1,10 @@
 package org.hush.feature.chat.components
 
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,10 +30,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import org.hush.core.designsystem.theme.InputContainerShape
 
@@ -48,6 +49,105 @@ fun ChatInputBar(
     modifier: Modifier = Modifier
 ) {
     val isSendEnabled = inputText.isNotBlank()
+    val transition = updateTransition(targetState = isSendEnabled, label = "send_mic_morph")
+
+    val buttonContainerColor by animateColorAsState(
+        targetValue = if (isSendEnabled) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.primaryContainer
+        },
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "button_container_color"
+    )
+
+    val buttonContentColor by animateColorAsState(
+        targetValue = if (isSendEnabled) {
+            MaterialTheme.colorScheme.onPrimary
+        } else {
+            MaterialTheme.colorScheme.onPrimaryContainer
+        },
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "button_content_color"
+    )
+
+    val sendScale by transition.animateFloat(
+        transitionSpec = {
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            )
+        },
+        label = "send_scale"
+    ) { target ->
+        if (target) 1.0f else 0.1f
+    }
+
+    val sendRotation by transition.animateFloat(
+        transitionSpec = {
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            )
+        },
+        label = "send_rotation"
+    ) { target ->
+        if (target) 0f else -45f
+    }
+
+    val sendAlpha by transition.animateFloat(
+        transitionSpec = {
+            spring(
+                dampingRatio = Spring.DampingRatioNoBouncy,
+                stiffness = Spring.StiffnessMedium
+            )
+        },
+        label = "send_alpha"
+    ) { target ->
+        if (target) 1.0f else 0.0f
+    }
+
+    val micScale by transition.animateFloat(
+        transitionSpec = {
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            )
+        },
+        label = "mic_scale"
+    ) { target ->
+        if (target) 0.1f else 1.0f
+    }
+
+    val micRotation by transition.animateFloat(
+        transitionSpec = {
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            )
+        },
+        label = "mic_rotation"
+    ) { target ->
+        if (target) 45f else 0f
+    }
+
+    val micAlpha by transition.animateFloat(
+        transitionSpec = {
+            spring(
+                dampingRatio = Spring.DampingRatioNoBouncy,
+                stiffness = Spring.StiffnessMedium
+            )
+        },
+        label = "mic_alpha"
+    ) { target ->
+        if (target) 0.0f else 1.0f
+    }
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -127,57 +227,49 @@ fun ChatInputBar(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                AnimatedContent(
-                    targetState = isSendEnabled,
-                    transitionSpec = {
-                        fadeIn(
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                stiffness = Spring.StiffnessMediumLow
-                            )
-                        ) togetherWith fadeOut(
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioNoBouncy,
-                                stiffness = Spring.StiffnessMedium
-                            )
-                        )
+                IconButton(
+                    onClick = {
+                        if (isSendEnabled) onSendClick() else onVoiceRecordClick()
                     },
-                    label = "send_mic_morph"
-                ) { targetEnabled ->
-                    if (targetEnabled) {
-                        IconButton(
-                            onClick = onSendClick,
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = buttonContainerColor,
+                        contentColor = buttonContentColor
+                    ),
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Send,
+                            contentDescription = "Send Message",
+                            tint = buttonContentColor,
                             modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Send,
-                                contentDescription = "Send Message",
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    } else {
-                        IconButton(
-                            onClick = onVoiceRecordClick,
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            ),
+                                .size(20.dp)
+                                .graphicsLayer {
+                                    scaleX = sendScale
+                                    scaleY = sendScale
+                                    rotationZ = sendRotation
+                                    alpha = sendAlpha
+                                }
+                        )
+
+                        Icon(
+                            imageVector = Icons.Default.Mic,
+                            contentDescription = "Record Voice Message",
+                            tint = buttonContentColor,
                             modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Mic,
-                                contentDescription = "Record Voice Message",
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
+                                .size(22.dp)
+                                .graphicsLayer {
+                                    scaleX = micScale
+                                    scaleY = micScale
+                                    rotationZ = micRotation
+                                    alpha = micAlpha
+                                }
+                        )
                     }
                 }
             }
