@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -19,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -61,82 +61,86 @@ fun ChatScreen(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
-        contentWindowInsets = WindowInsets.safeDrawing,
-        topBar = {
+        contentWindowInsets = WindowInsets.safeDrawing
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .consumeWindowInsets(innerPadding)
+        ) {
+            LazyColumn(
+                state = listState,
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = innerPadding.calculateTopPadding() + 72.dp,
+                    bottom = innerPadding.calculateBottomPadding() + 80.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                item(
+                    key = "date_chip_today",
+                    contentType = "header_date_chip"
+                ) {
+                    ChatDateChip(dateText = "Today")
+                }
+
+                itemsIndexed(
+                    items = uiState.messages,
+                    key = { _, message -> message.id },
+                    contentType = { _, _ -> "chat_message_item" }
+                ) { index, message ->
+                    val prevMessage = if (index > 0) uiState.messages[index - 1] else null
+                    val extraTopPadding = if (prevMessage != null && prevMessage.isOutgoing != message.isOutgoing) {
+                        8.dp
+                    } else {
+                        0.dp
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = extraTopPadding)
+                    ) {
+                        ChatMessageBubble(message = message)
+                    }
+                }
+
+                if (uiState.isRecipientTyping) {
+                    item(
+                        key = "typing_indicator",
+                        contentType = "status_typing_indicator"
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
+                        ) {
+                            ChatTypingIndicator()
+                        }
+                    }
+                }
+            }
+
             ChatTopBar(
                 recipient = uiState.recipient,
                 onBackClick = { onEvent(ChatUiEvent.BackClicked) },
                 onCallClick = { onEvent(ChatUiEvent.CallClicked) },
-                onVideoCallClick = { onEvent(ChatUiEvent.VideoCallClicked) },
-                onMoreOptionsClick = { onEvent(ChatUiEvent.MoreOptionsClicked) }
+                onMoreOptionsClick = { onEvent(ChatUiEvent.MoreOptionsClicked) },
+                modifier = Modifier.align(Alignment.TopCenter)
             )
-        },
-        bottomBar = {
+
             ChatInputBar(
                 inputText = uiState.inputText,
                 onInputTextChanged = { onEvent(ChatUiEvent.InputTextChanged(it)) },
                 onSendClick = { onEvent(ChatUiEvent.SendMessage) },
                 onAttachmentClick = { onEvent(ChatUiEvent.AttachmentClicked) },
                 onVoiceRecordClick = { onEvent(ChatUiEvent.VoiceRecordClicked) },
-                modifier = Modifier.imePadding()
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .imePadding()
             )
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            state = listState,
-            contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = innerPadding.calculateTopPadding() + 8.dp,
-                bottom = innerPadding.calculateBottomPadding() + 8.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .consumeWindowInsets(innerPadding)
-        ) {
-            item(
-                key = "date_chip_today",
-                contentType = "header_date_chip"
-            ) {
-                ChatDateChip(dateText = "Today")
-            }
-
-            itemsIndexed(
-                items = uiState.messages,
-                key = { _, message -> message.id },
-                contentType = { _, _ -> "chat_message_item" }
-            ) { index, message ->
-                val prevMessage = if (index > 0) uiState.messages[index - 1] else null
-                val extraTopPadding = if (prevMessage != null && prevMessage.isOutgoing != message.isOutgoing) {
-                    8.dp
-                } else {
-                    0.dp
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = extraTopPadding)
-                ) {
-                    ChatMessageBubble(message = message)
-                }
-            }
-
-            if (uiState.isRecipientTyping) {
-                item(
-                    key = "typing_indicator",
-                    contentType = "status_typing_indicator"
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp)
-                    ) {
-                        ChatTypingIndicator()
-                    }
-                }
-            }
         }
     }
 }

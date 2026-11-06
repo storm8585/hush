@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -54,7 +55,6 @@ fun ChatMessageBubble(
     }
 
     val alignment = if (isOutgoing) Alignment.CenterEnd else Alignment.CenterStart
-    val isShortMessage = message.text.length <= 32 && !message.text.contains('\n')
 
     Box(
         contentAlignment = alignment,
@@ -62,72 +62,43 @@ fun ChatMessageBubble(
     ) {
         Box(
             modifier = Modifier
-                .widthIn(max = 300.dp)
+                .widthIn(max = 290.dp)
                 .clip(bubbleShape)
                 .background(containerColor)
         ) {
-            if (isShortMessage) {
+            Column(
+                modifier = Modifier.padding(start = 12.dp, end = 10.dp, top = 5.dp, bottom = 2.dp)
+            ) {
+                Text(
+                    text = message.text,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        lineHeight = 20.sp
+                    ),
+                    color = contentColor
+                )
+
                 Row(
-                    verticalAlignment = Alignment.Bottom,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .offset(y = (-3).dp)
                 ) {
                     Text(
-                        text = message.text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = contentColor
+                        text = message.timestamp,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 11.sp,
+                            lineHeight = 11.sp
+                        ),
+                        color = timestampColor
                     )
 
-                    Spacer(modifier = Modifier.width(6.dp))
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 1.dp)
-                    ) {
-                        Text(
-                            text = message.timestamp,
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                            color = timestampColor
+                    if (isOutgoing) {
+                        Spacer(modifier = Modifier.width(3.dp))
+                        ChatStatusIndicator(
+                            status = message.status,
+                            tint = timestampColor
                         )
-
-                        if (isOutgoing) {
-                            Spacer(modifier = Modifier.width(3.dp))
-                            ChatStatusIndicator(
-                                status = message.status,
-                                tint = timestampColor
-                            )
-                        }
-                    }
-                }
-            } else {
-                Column(
-                    modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 6.dp, bottom = 4.dp)
-                ) {
-                    Text(
-                        text = message.text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = contentColor
-                    )
-
-                    Row(
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .align(Alignment.End)
-                            .padding(top = 1.dp)
-                    ) {
-                        Text(
-                            text = message.timestamp,
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                            color = timestampColor
-                        )
-
-                        if (isOutgoing) {
-                            Spacer(modifier = Modifier.width(3.dp))
-                            ChatStatusIndicator(
-                                status = message.status,
-                                tint = timestampColor
-                            )
-                        }
                     }
                 }
             }
