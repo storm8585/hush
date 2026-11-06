@@ -6,12 +6,14 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -149,6 +151,10 @@ fun ChatInputBar(
         if (target) 0.0f else 1.0f
     }
 
+    val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val imePadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+    val bottomInset = maxOf(navBarPadding, imePadding)
+
     Box(
         modifier = modifier.fillMaxWidth()
     ) {
@@ -158,8 +164,8 @@ fun ChatInputBar(
                 .background(
                     Brush.verticalGradient(
                         0.0f to Color.Transparent,
-                        0.3f to MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
-                        0.7f to MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                        0.25f to MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                        0.65f to MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
                         1.0f to MaterialTheme.colorScheme.surface
                     )
                 )
@@ -169,7 +175,7 @@ fun ChatInputBar(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
+                .padding(bottom = bottomInset)
                 .padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
             IconButton(
@@ -190,12 +196,7 @@ fun ChatInputBar(
                 modifier = Modifier
                     .weight(1f)
                     .clip(InputContainerShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.88f))
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                        shape = InputContainerShape
-                    )
+                    .background(MaterialTheme.colorScheme.surfaceContainerLowest)
                     .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
                 Row(

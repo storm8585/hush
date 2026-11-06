@@ -4,12 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -57,27 +58,30 @@ fun ChatScreen(
         }
     }
 
+    val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val navBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
-        contentWindowInsets = WindowInsets.safeDrawing
-    ) { innerPadding ->
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+    ) { _ ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .consumeWindowInsets(innerPadding)
+            modifier = Modifier.fillMaxSize()
         ) {
             LazyColumn(
                 state = listState,
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     end = 16.dp,
-                    top = innerPadding.calculateTopPadding() + 72.dp,
-                    bottom = innerPadding.calculateBottomPadding() + 80.dp
+                    top = statusBarHeight + 68.dp,
+                    bottom = navBarHeight + 76.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding()
             ) {
                 item(
                     key = "date_chip_today",
@@ -137,9 +141,7 @@ fun ChatScreen(
                 onSendClick = { onEvent(ChatUiEvent.SendMessage) },
                 onAttachmentClick = { onEvent(ChatUiEvent.AttachmentClicked) },
                 onVoiceRecordClick = { onEvent(ChatUiEvent.VoiceRecordClicked) },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .imePadding()
+                modifier = Modifier.align(Alignment.BottomCenter)
             )
         }
     }

@@ -1,13 +1,11 @@
 package org.hush.feature.chat.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -49,8 +47,8 @@ fun ChatTopBar(
                 .background(
                     Brush.verticalGradient(
                         0.0f to MaterialTheme.colorScheme.surface,
-                        0.5f to MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
-                        0.8f to MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                        0.6f to MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                        0.85f to MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
                         1.0f to Color.Transparent
                     )
                 )
@@ -68,12 +66,7 @@ fun ChatTopBar(
                 modifier = Modifier
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.88f))
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                        shape = CircleShape
-                    )
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f))
             ) {
                 IconButton(
                     onClick = onBackClick,
@@ -120,11 +113,6 @@ fun ChatTopBar(
                                 .align(Alignment.BottomEnd)
                                 .clip(CircleShape)
                                 .background(Color(0xFF386A20))
-                                .border(
-                                    width = 2.dp,
-                                    color = MaterialTheme.colorScheme.surface,
-                                    shape = CircleShape
-                                )
                         )
                     }
                 }
@@ -157,13 +145,8 @@ fun ChatTopBar(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.88f))
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                        shape = CircleShape
-                    )
-                    .padding(horizontal = 2.dp, vertical = 2.dp)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f))
+                    .padding(horizontal = 4.dp, vertical = 2.dp)
             ) {
                 IconButton(
                     onClick = onCallClick,
@@ -176,13 +159,6 @@ fun ChatTopBar(
                         modifier = Modifier.size(19.dp)
                     )
                 }
-
-                Box(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .height(16.dp)
-                        .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
-                )
 
                 IconButton(
                     onClick = onMoreOptionsClick,
