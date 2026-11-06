@@ -1,4 +1,4 @@
-name: Build Android ARMv7
+name: Debug
 
 on:
   push:
@@ -7,35 +7,42 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
+    name: Debug
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: jdk17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - name: gradlestp
+        uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: false
 
-      - name: Grant Execute Permission for Gradlew
-        run: chmod +x ./android/gradlew
+      - name: wrapper
+        run: chmod +x ./hush-android/gradlew
 
-      - name: Build Debug APK
-        working-directory: ./android
+      - name: build
+        working-directory: ./hush-android
         run: ./gradlew assembleDebug --stacktrace
 
-      - name: Upload ARMv7 APK Artifact
+      - name: push
         uses: actions/upload-artifact@v4
         with:
-          name: hush-armv7-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          name: debug
+          path: hush-android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14
