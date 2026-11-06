@@ -2,9 +2,9 @@ name: Debug
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "debug" ]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "debug" ]
   workflow_dispatch:
 
 concurrency:
