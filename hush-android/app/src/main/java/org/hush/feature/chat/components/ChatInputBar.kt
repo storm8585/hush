@@ -170,6 +170,13 @@ fun ChatInputBar(
     val imePadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
     val bottomInset = maxOf(navBarPadding, imePadding)
 
+    val replyBannerShape = RoundedCornerShape(
+        topStart = 16.dp,
+        topEnd = 16.dp,
+        bottomStart = 0.dp,
+        bottomEnd = 0.dp
+    )
+
     Box(
         modifier = modifier.fillMaxWidth()
     ) {
@@ -201,22 +208,24 @@ fun ChatInputBar(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 4.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-                            .padding(start = 10.dp, end = 6.dp, top = 6.dp, bottom = 6.dp)
+                            .padding(horizontal = 8.dp)
+                            .clip(replyBannerShape)
+                            .background(Color.White)
                     ) {
                         Box(
                             modifier = Modifier
-                                .width(3.dp)
-                                .height(32.dp)
-                                .clip(RoundedCornerShape(1.5.dp))
+                                .width(4.dp)
+                                .height(44.dp)
                                 .background(MaterialTheme.colorScheme.primary)
                         )
 
                         Spacer(modifier = Modifier.width(10.dp))
 
-                        Column(modifier = Modifier.weight(1f)) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(vertical = 6.dp)
+                        ) {
                             Text(
                                 text = if (replyingToMessage.isOutgoing) "You" else "Elena Rostova",
                                 style = MaterialTheme.typography.labelMedium.copy(
@@ -240,7 +249,7 @@ fun ChatInputBar(
 
                         IconButton(
                             onClick = onCancelReply,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(36.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
@@ -249,9 +258,13 @@ fun ChatInputBar(
                                 modifier = Modifier.size(18.dp)
                             )
                         }
+
+                        Spacer(modifier = Modifier.width(4.dp))
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(4.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -264,7 +277,7 @@ fun ChatInputBar(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                        .background(Color.White)
                 ) {
                     IconButton(
                         onClick = onAttachmentClick,
@@ -285,7 +298,7 @@ fun ChatInputBar(
                     modifier = Modifier
                         .weight(1f)
                         .clip(InputContainerShape)
-                        .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                        .background(Color.White)
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
                     Row(

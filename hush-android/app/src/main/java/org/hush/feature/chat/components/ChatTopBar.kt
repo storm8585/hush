@@ -67,7 +67,7 @@ fun ChatTopBar(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f))
+                    .background(Color.White)
             ) {
                 IconButton(
                     onClick = onBackClick,
@@ -136,7 +136,7 @@ fun ChatTopBar(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f))
+                    .background(Color.White)
                     .padding(horizontal = 4.dp, vertical = 2.dp)
             ) {
                 IconButton(

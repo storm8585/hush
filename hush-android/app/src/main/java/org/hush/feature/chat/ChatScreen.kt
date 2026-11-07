@@ -29,6 +29,7 @@ import org.hush.feature.chat.components.ChatInputBar
 import org.hush.feature.chat.components.ChatMessageBubble
 import org.hush.feature.chat.components.ChatTopBar
 import org.hush.feature.chat.components.ChatTypingIndicator
+import org.hush.feature.chat.components.MessageBubblePosition
 
 @Composable
 fun ChatRoute(
@@ -78,7 +79,7 @@ fun ChatScreen(
                     top = statusBarHeight + 74.dp,
                     bottom = navBarHeight + 76.dp
                 ),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
                 modifier = Modifier
                     .fillMaxSize()
                     .imePadding()
@@ -96,8 +97,20 @@ fun ChatScreen(
                     contentType = { _, _ -> "chat_message_item" }
                 ) { index, message ->
                     val prevMessage = if (index > 0) uiState.messages[index - 1] else null
-                    val extraTopPadding = if (prevMessage != null && prevMessage.isOutgoing != message.isOutgoing) {
-                        8.dp
+                    val nextMessage = if (index < uiState.messages.size - 1) uiState.messages[index + 1] else null
+
+                    val isPrevSame = prevMessage != null && prevMessage.isOutgoing == message.isOutgoing
+                    val isNextSame = nextMessage != null && nextMessage.isOutgoing == message.isOutgoing
+
+                    val position = when {
+                        !isPrevSame && !isNextSame -> MessageBubblePosition.Single
+                        !isPrevSame && isNextSame -> MessageBubblePosition.First
+                        isPrevSame && isNextSame -> MessageBubblePosition.Middle
+                        else -> MessageBubblePosition.Last
+                    }
+
+                    val extraTopPadding = if (prevMessage != null && !isPrevSame) {
+                        10.dp
                     } else {
                         0.dp
                     }
@@ -109,6 +122,7 @@ fun ChatScreen(
                     ) {
                         ChatMessageBubble(
                             message = message,
+                            position = position,
                             onSwipeToReply = { onEvent(ChatUiEvent.ReplyToMessage(it)) }
                         )
                     }
