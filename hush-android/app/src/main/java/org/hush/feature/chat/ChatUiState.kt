@@ -12,7 +12,9 @@ data class ChatMessageUiModel(
     val text: String,
     val timestamp: String,
     val isOutgoing: Boolean,
-    val status: MessageDeliveryStatus = MessageDeliveryStatus.Read
+    val status: MessageDeliveryStatus = MessageDeliveryStatus.Read,
+    val replyToText: String? = null,
+    val replyToAuthor: String? = null
 )
 
 data class RecipientUiModel(
@@ -33,7 +35,8 @@ data class ChatUiState(
     ),
     val messages: List<ChatMessageUiModel> = emptyList(),
     val inputText: String = "",
-    val isRecipientTyping: Boolean = false
+    val isRecipientTyping: Boolean = false,
+    val replyingToMessage: ChatMessageUiModel? = null
 ) {
     val isSendActionEnabled: Boolean
         get() = inputText.isNotBlank()

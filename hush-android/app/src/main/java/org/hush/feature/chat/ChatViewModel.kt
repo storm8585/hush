@@ -66,6 +66,12 @@ class ChatViewModel : ViewModel() {
             is ChatUiEvent.SendMessage -> {
                 sendMessage()
             }
+            is ChatUiEvent.ReplyToMessage -> {
+                _uiState.update { it.copy(replyingToMessage = event.message) }
+            }
+            is ChatUiEvent.CancelReply -> {
+                _uiState.update { it.copy(replyingToMessage = null) }
+            }
             is ChatUiEvent.AttachmentClicked -> Unit
             is ChatUiEvent.VoiceRecordClicked -> Unit
             is ChatUiEvent.CallClicked -> Unit
@@ -79,29 +85,37 @@ class ChatViewModel : ViewModel() {
         val currentText = _uiState.value.inputText.trim()
         if (currentText.isEmpty()) return
 
+        val state = _uiState.value
+        val replyingTo = state.replyingToMessage
+
         val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
         val newMessage = ChatMessageUiModel(
             id = UUID.randomUUID().toString(),
             text = currentText,
             timestamp = currentTime,
             isOutgoing = true,
-            status = MessageDeliveryStatus.Sent
+            status = MessageDeliveryStatus.Sent,
+            replyToText = replyingTo?.text,
+            replyToAuthor = replyingTo?.let {
+                if (it.isOutgoing) "You" else state.recipient.name
+            }
         )
 
-        _uiState.update { state ->
-            state.copy(
-                messages = state.messages + newMessage,
-                inputText = ""
+        _uiState.update { current ->
+            current.copy(
+                messages = current.messages + newMessage,
+                inputText = "",
+                replyingToMessage = null
             )
         }
 
         viewModelScope.launch {
             delay(1200)
-            _uiState.update { state ->
-                val updated = state.messages.map { msg ->
+            _uiState.update { s ->
+                val updated = s.messages.map { msg ->
                     if (msg.id == newMessage.id) msg.copy(status = MessageDeliveryStatus.Delivered) else msg
                 }
-                state.copy(messages = updated)
+                s.copy(messages = updated)
             }
         }
     }

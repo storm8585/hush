@@ -9,4 +9,6 @@ sealed interface ChatUiEvent {
     data object VideoCallClicked : ChatUiEvent
     data object MoreOptionsClicked : ChatUiEvent
     data object BackClicked : ChatUiEvent
+    data class ReplyToMessage(val message: ChatMessageUiModel) : ChatUiEvent
+    data object CancelReply : ChatUiEvent
 }

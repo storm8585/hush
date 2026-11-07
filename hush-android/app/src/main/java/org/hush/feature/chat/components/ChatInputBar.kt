@@ -1,27 +1,36 @@
 package org.hush.feature.chat.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.outlined.EmojiEmotions
 import androidx.compose.material3.Icon
@@ -38,8 +47,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.hush.core.designsystem.theme.InputContainerShape
+import org.hush.feature.chat.ChatMessageUiModel
 
 @Composable
 fun ChatInputBar(
@@ -48,7 +61,9 @@ fun ChatInputBar(
     onSendClick: () -> Unit,
     onAttachmentClick: () -> Unit,
     onVoiceRecordClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    replyingToMessage: ChatMessageUiModel? = null,
+    onCancelReply: () -> Unit = {}
 ) {
     val isSendEnabled = inputText.isNotBlank()
     val transition = updateTransition(targetState = isSendEnabled, label = "send_mic_morph")
@@ -171,124 +186,191 @@ fun ChatInputBar(
                 )
         )
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = bottomInset)
-                .padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+            AnimatedVisibility(
+                visible = replyingToMessage != null,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
             ) {
-                IconButton(
-                    onClick = onAttachmentClick,
-                    modifier = Modifier.size(44.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Attach file",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(InputContainerShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-                    .padding(horizontal = 14.dp, vertical = 10.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Box(
-                        modifier = Modifier.weight(1f)
+                if (replyingToMessage != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 4.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                            .padding(start = 10.dp, end = 6.dp, top = 6.dp, bottom = 6.dp)
                     ) {
-                        if (inputText.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .width(3.dp)
+                                .height(32.dp)
+                                .clip(RoundedCornerShape(1.5.dp))
+                                .background(MaterialTheme.colorScheme.primary)
+                        )
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Message...",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                text = if (replyingToMessage.isOutgoing) "You" else "Elena Rostova",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.primary
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = replyingToMessage.text,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
-                        BasicTextField(
-                            value = inputText,
-                            onValueChange = onInputTextChanged,
-                            textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
-                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                            maxLines = 4,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+
+                        IconButton(
+                            onClick = onCancelReply,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Cancel reply",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
-
-                    Spacer(modifier = Modifier.width(6.dp))
-
-                    Icon(
-                        imageVector = Icons.Outlined.EmojiEmotions,
-                        contentDescription = "Emojis",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(22.dp)
-                    )
                 }
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
-
-            IconButton(
-                onClick = {
-                    if (isSendEnabled) onSendClick() else onVoiceRecordClick()
-                },
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = buttonContainerColor,
-                    contentColor = buttonContentColor
-                ),
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 6.dp)
             ) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceContainerLowest)
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Send,
-                        contentDescription = "Send Message",
-                        tint = buttonContentColor,
-                        modifier = Modifier
-                            .size(20.dp)
-                            .graphicsLayer {
-                                scaleX = sendScale
-                                scaleY = sendScale
-                                rotationZ = sendRotation
-                                alpha = sendAlpha
-                            }
-                    )
+                    IconButton(
+                        onClick = onAttachmentClick,
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Attach file",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
 
-                    Icon(
-                        imageVector = Icons.Default.Mic,
-                        contentDescription = "Record Voice Message",
-                        tint = buttonContentColor,
-                        modifier = Modifier
-                            .size(22.dp)
-                            .graphicsLayer {
-                                scaleX = micScale
-                                scaleY = micScale
-                                rotationZ = micRotation
-                                alpha = micAlpha
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(InputContainerShape)
+                        .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                        .padding(horizontal = 14.dp, vertical = 10.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Box(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            if (inputText.isEmpty()) {
+                                Text(
+                                    text = "Message...",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                )
                             }
-                    )
+                            BasicTextField(
+                                value = inputText,
+                                onValueChange = onInputTextChanged,
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface
+                                ),
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                maxLines = 4,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(6.dp))
+
+                        Icon(
+                            imageVector = Icons.Outlined.EmojiEmotions,
+                            contentDescription = "Emojis",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                IconButton(
+                    onClick = {
+                        if (isSendEnabled) onSendClick() else onVoiceRecordClick()
+                    },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = buttonContainerColor,
+                        contentColor = buttonContentColor
+                    ),
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Send,
+                            contentDescription = "Send Message",
+                            tint = buttonContentColor,
+                            modifier = Modifier
+                                .size(20.dp)
+                                .graphicsLayer {
+                                    scaleX = sendScale
+                                    scaleY = sendScale
+                                    rotationZ = sendRotation
+                                    alpha = sendAlpha
+                                }
+                        )
+
+                        Icon(
+                            imageVector = Icons.Default.Mic,
+                            contentDescription = "Record Voice Message",
+                            tint = buttonContentColor,
+                            modifier = Modifier
+                                .size(22.dp)
+                                .graphicsLayer {
+                                    scaleX = micScale
+                                    scaleY = micScale
+                                    rotationZ = micRotation
+                                    alpha = micAlpha
+                                }
+                        )
+                    }
                 }
             }
         }

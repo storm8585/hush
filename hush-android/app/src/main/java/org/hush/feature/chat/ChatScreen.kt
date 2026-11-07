@@ -107,7 +107,10 @@ fun ChatScreen(
                             .fillMaxWidth()
                             .padding(top = extraTopPadding)
                     ) {
-                        ChatMessageBubble(message = message)
+                        ChatMessageBubble(
+                            message = message,
+                            onSwipeToReply = { onEvent(ChatUiEvent.ReplyToMessage(it)) }
+                        )
                     }
                 }
 
@@ -141,6 +144,8 @@ fun ChatScreen(
                 onSendClick = { onEvent(ChatUiEvent.SendMessage) },
                 onAttachmentClick = { onEvent(ChatUiEvent.AttachmentClicked) },
                 onVoiceRecordClick = { onEvent(ChatUiEvent.VoiceRecordClicked) },
+                replyingToMessage = uiState.replyingToMessage,
+                onCancelReply = { onEvent(ChatUiEvent.CancelReply) },
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
         }
