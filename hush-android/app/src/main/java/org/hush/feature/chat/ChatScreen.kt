@@ -21,12 +21,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.hush.feature.chat.components.ChatDateChip
 import org.hush.feature.chat.components.ChatInputBar
 import org.hush.feature.chat.components.ChatMessageBubble
+import org.hush.feature.chat.components.ChatMessageContextMenu
+import org.hush.feature.chat.components.ChatToast
 import org.hush.feature.chat.components.ChatTopBar
 import org.hush.feature.chat.components.ChatTypingIndicator
 import org.hush.feature.chat.components.MessageBubblePosition
@@ -52,6 +56,7 @@ fun ChatScreen(
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
+    val clipboardManager = LocalClipboardManager.current
 
     LaunchedEffect(uiState.messages.size) {
         if (uiState.messages.isNotEmpty()) {
@@ -123,7 +128,8 @@ fun ChatScreen(
                         ChatMessageBubble(
                             message = message,
                             position = position,
-                            onSwipeToReply = { onEvent(ChatUiEvent.ReplyToMessage(it)) }
+                            onSwipeToReply = { onEvent(ChatUiEvent.ReplyToMessage(it)) },
+                            onLongClick = { onEvent(ChatUiEvent.MessageLongClicked(it)) }
                         )
                     }
                 }
@@ -160,8 +166,32 @@ fun ChatScreen(
                 onVoiceRecordClick = { onEvent(ChatUiEvent.VoiceRecordClicked) },
                 replyingToMessage = uiState.replyingToMessage,
                 onCancelReply = { onEvent(ChatUiEvent.CancelReply) },
+                editingMessage = uiState.editingMessage,
+                onCancelEdit = { onEvent(ChatUiEvent.CancelEdit) },
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
+
+            ChatToast(
+                message = uiState.toastMessage,
+                onDismiss = { onEvent(ChatUiEvent.DismissToast) },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = navBarHeight + 76.dp)
+            )
+
+            uiState.selectedMessageForMenu?.let { selectedMessage ->
+                ChatMessageContextMenu(
+                    message = selectedMessage,
+                    onDismiss = { onEvent(ChatUiEvent.DismissMenu) },
+                    onReply = { onEvent(ChatUiEvent.ReplyToMessage(it)) },
+                    onCopy = {
+                        clipboardManager.setText(AnnotatedString(it.text))
+                        onEvent(ChatUiEvent.CopyMessage(it))
+                    },
+                    onEdit = { onEvent(ChatUiEvent.StartEditMessage(it)) },
+                    onDelete = { onEvent(ChatUiEvent.DeleteMessage(it)) }
+                )
+            }
         }
     }
 }

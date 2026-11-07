@@ -5,13 +5,13 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,7 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -37,7 +36,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.AnnotatedString
@@ -45,7 +43,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -118,7 +115,8 @@ fun ChatMessageBubble(
     message: ChatMessageUiModel,
     modifier: Modifier = Modifier,
     position: MessageBubblePosition = MessageBubblePosition.Single,
-    onSwipeToReply: (ChatMessageUiModel) -> Unit = {}
+    onSwipeToReply: (ChatMessageUiModel) -> Unit = {},
+    onLongClick: (ChatMessageUiModel) -> Unit = {}
 ) {
     val isOutgoing = message.isOutgoing
 
@@ -153,114 +151,32 @@ fun ChatMessageBubble(
     val offsetX = remember { Animatable(0f) }
     val hapticFeedback = LocalHapticFeedback.current
     var hasTriggeredHaptic by remember { mutableStateOf(false) }
-    var bubbleWidth by remember { mutableIntStateOf(0) }
 
     val thresholdPx = with(LocalDensity.current) { 48.dp.toPx() }
     val maxDragPx = with(LocalDensity.current) { 68.dp.toPx() }
 
     val hasQuote = message.replyToText != null
 
-    Box(
-        contentAlignment = alignment,
-        modifier = modifier
-            .fillMaxWidth()
-            .pointerInput(message.id) {
-                detectHorizontalDragGestures(
-                    onDragStart = {
-                        hasTriggeredHaptic = false
-                    },
-                    onDragEnd = {
-                        if (-offsetX.value >= thresholdPx) {
-                            onSwipeToReply(message)
-                        }
-                        coroutineScope.launch {
-                            offsetX.animateTo(
-                                targetValue = 0f,
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    stiffness = Spring.StiffnessMediumLow
-                                )
-                            )
-                        }
-                    },
-                    onDragCancel = {
-                        coroutineScope.launch {
-                            offsetX.animateTo(
-                                targetValue = 0f,
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    stiffness = Spring.StiffnessMediumLow
-                                )
-                            )
-                        }
-                    },
-                    onHorizontalDrag = { change, dragAmount ->
-                        if (dragAmount < 0 || offsetX.value < 0) {
-                            change.consume()
-                            val newOffset = (offsetX.value + dragAmount * 0.55f).coerceIn(-maxDragPx, 0f)
-                            coroutineScope.launch {
-                                offsetX.snapTo(newOffset)
-                            }
-                            if (-newOffset >= thresholdPx && !hasTriggeredHaptic) {
-                                hasTriggeredHaptic = true
-                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                            } else if (-newOffset < thresholdPx && hasTriggeredHaptic) {
-                                hasTriggeredHaptic = false
-                            }
-                        }
-                    }
-                )
-            }
-    ) {
-        val dragProgress = (-offsetX.value / thresholdPx).coerceIn(0f, 1f)
-        if (dragProgress > 0f) {
-            val iconModifier = if (isOutgoing) {
-                Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(end = 8.dp)
-            } else {
-                Modifier
-                    .align(Alignment.CenterStart)
-                    .offset {
-                        val iconX = maxOf(0, bubbleWidth - 42.dp.roundToPx() - (offsetX.value * 0.25f).roundToInt())
-                        IntOffset(x = iconX, y = 0)
-                    }
-            }
-
+    Layout(
+        content = {
             Box(
-                contentAlignment = Alignment.Center,
-                modifier = iconModifier
+                modifier = Modifier
                     .graphicsLayer {
-                        val scale = 0.3f + dragProgress * 0.7f
-                        scaleX = scale
-                        scaleY = scale
-                        alpha = dragProgress
-                        rotationZ = (1f - dragProgress) * 45f
+                        translationX = offsetX.value
                     }
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .pointerInput(message.id) {
+                        detectTapGestures(
+                            onLongPress = {
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onLongClick(message)
+                            }
+                        )
+                    }
+                    .widthIn(max = 290.dp)
+                    .clip(bubbleShape)
+                    .background(containerColor)
+                    .padding(start = 10.dp, end = 10.dp, top = 7.dp, bottom = 6.dp)
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Reply,
-                    contentDescription = "Reply",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-
-        Box(
-            modifier = Modifier
-                .onSizeChanged { bubbleWidth = it.width }
-                .graphicsLayer {
-                    translationX = offsetX.value
-                }
-                .widthIn(max = 290.dp)
-                .clip(bubbleShape)
-                .background(containerColor)
-                .padding(start = 10.dp, end = 10.dp, top = 7.dp, bottom = 6.dp)
-        ) {
             Layout(
                 content = {
                     if (hasQuote) {
@@ -336,6 +252,21 @@ fun ChatMessageBubble(
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        if (message.isEdited) {
+                            Text(
+                                text = "edited",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 10.sp,
+                                    lineHeight = 10.sp,
+                                    fontWeight = FontWeight.Normal
+                                ),
+                                color = timestampColor,
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                        }
+
                         Text(
                             text = message.timestamp,
                             style = MaterialTheme.typography.labelSmall.copy(
@@ -454,5 +385,106 @@ fun ChatMessageBubble(
                 }
             }
         }
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .graphicsLayer {
+                    val p = (-offsetX.value / thresholdPx).coerceIn(0f, 1f)
+                    val scale = 0.3f + p * 0.7f
+                    scaleX = scale
+                    scaleY = scale
+                    alpha = p
+                    rotationZ = (1f - p) * 45f
+                    if (!isOutgoing) {
+                        translationX = -offsetX.value * 0.25f
+                    }
+                }
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.Reply,
+                contentDescription = "Reply",
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+    },
+    modifier = modifier
+        .fillMaxWidth()
+        .pointerInput(message.id) {
+            detectHorizontalDragGestures(
+                onDragStart = {
+                    hasTriggeredHaptic = false
+                },
+                onDragEnd = {
+                    if (-offsetX.value >= thresholdPx) {
+                        onSwipeToReply(message)
+                    }
+                    coroutineScope.launch {
+                        offsetX.animateTo(
+                            targetValue = 0f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                stiffness = Spring.StiffnessMedium
+                            )
+                        )
+                    }
+                },
+                onDragCancel = {
+                    coroutineScope.launch {
+                        offsetX.animateTo(
+                            targetValue = 0f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                stiffness = Spring.StiffnessMedium
+                            )
+                        )
+                    }
+                },
+                onHorizontalDrag = { change, dragAmount ->
+                    if (dragAmount < 0 || offsetX.value < 0) {
+                        change.consume()
+                        val newOffset = (offsetX.value + dragAmount * 0.55f).coerceIn(-maxDragPx, 0f)
+                        coroutineScope.launch {
+                            offsetX.snapTo(newOffset)
+                        }
+                        if (-newOffset >= thresholdPx && !hasTriggeredHaptic) {
+                            hasTriggeredHaptic = true
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        } else if (-newOffset < thresholdPx && hasTriggeredHaptic) {
+                            hasTriggeredHaptic = false
+                        }
+                    }
+                }
+            )
+        }
+) { measurables, constraints ->
+    val bubblePlaceable = measurables[0].measure(
+        constraints.copy(minWidth = 0, minHeight = 0)
+    )
+    val iconPlaceable = measurables.getOrNull(1)?.measure(Constraints())
+
+    val bubbleX = if (isOutgoing) {
+        constraints.maxWidth - bubblePlaceable.width
+    } else {
+        0
     }
+
+    layout(constraints.maxWidth, bubblePlaceable.height) {
+        bubblePlaceable.placeRelative(bubbleX, 0)
+
+        if (iconPlaceable != null) {
+            val iconY = (bubblePlaceable.height - iconPlaceable.height) / 2
+            val iconX = if (isOutgoing) {
+                constraints.maxWidth - iconPlaceable.width - 8.dp.roundToPx()
+            } else {
+                maxOf(0, bubblePlaceable.width - 38.dp.roundToPx())
+            }
+            iconPlaceable.placeRelative(iconX, iconY)
+        }
+    }
+}
 }

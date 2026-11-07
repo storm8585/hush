@@ -11,4 +11,11 @@ sealed interface ChatUiEvent {
     data object BackClicked : ChatUiEvent
     data class ReplyToMessage(val message: ChatMessageUiModel) : ChatUiEvent
     data object CancelReply : ChatUiEvent
+    data class MessageLongClicked(val message: ChatMessageUiModel) : ChatUiEvent
+    data object DismissMenu : ChatUiEvent
+    data class StartEditMessage(val message: ChatMessageUiModel) : ChatUiEvent
+    data object CancelEdit : ChatUiEvent
+    data class CopyMessage(val message: ChatMessageUiModel) : ChatUiEvent
+    data class DeleteMessage(val message: ChatMessageUiModel) : ChatUiEvent
+    data object DismissToast : ChatUiEvent
 }

@@ -1,6 +1,7 @@
 package org.hush.feature.chat.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -66,8 +68,31 @@ fun ChatTopBar(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .size(44.dp)
+                    .shadow(
+                        elevation = 3.dp,
+                        shape = CircleShape,
+                        ambientColor = Color.Black.copy(alpha = 0.04f),
+                        spotColor = Color.Black.copy(alpha = 0.06f)
+                    )
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.verticalGradient(
+                            listOf(
+                                Color.White,
+                                Color(0xFFE4E4EB)
+                            )
+                        ),
+                        shape = CircleShape
+                    )
                     .clip(CircleShape)
-                    .background(Color.White)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                Color.White,
+                                Color(0xFFF9F9FB)
+                            )
+                        )
+                    )
             ) {
                 IconButton(
                     onClick = onBackClick,
@@ -135,8 +160,31 @@ fun ChatTopBar(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
+                    .shadow(
+                        elevation = 3.dp,
+                        shape = CircleShape,
+                        ambientColor = Color.Black.copy(alpha = 0.04f),
+                        spotColor = Color.Black.copy(alpha = 0.06f)
+                    )
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.verticalGradient(
+                            listOf(
+                                Color.White,
+                                Color(0xFFE4E4EB)
+                            )
+                        ),
+                        shape = CircleShape
+                    )
                     .clip(CircleShape)
-                    .background(Color.White)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                Color.White,
+                                Color(0xFFF9F9FB)
+                            )
+                        )
+                    )
                     .padding(horizontal = 4.dp, vertical = 2.dp)
             ) {
                 IconButton(

@@ -2,6 +2,7 @@ package org.hush.feature.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,6 +59,8 @@ class ChatViewModel : ViewModel() {
     )
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
+    private var toastJob: Job? = null
+
     fun onEvent(event: ChatUiEvent) {
         when (event) {
             is ChatUiEvent.InputTextChanged -> {
@@ -67,10 +70,46 @@ class ChatViewModel : ViewModel() {
                 sendMessage()
             }
             is ChatUiEvent.ReplyToMessage -> {
-                _uiState.update { it.copy(replyingToMessage = event.message) }
+                _uiState.update { it.copy(replyingToMessage = event.message, selectedMessageForMenu = null) }
             }
             is ChatUiEvent.CancelReply -> {
                 _uiState.update { it.copy(replyingToMessage = null) }
+            }
+            is ChatUiEvent.MessageLongClicked -> {
+                _uiState.update { it.copy(selectedMessageForMenu = event.message) }
+            }
+            is ChatUiEvent.DismissMenu -> {
+                _uiState.update { it.copy(selectedMessageForMenu = null) }
+            }
+            is ChatUiEvent.StartEditMessage -> {
+                _uiState.update {
+                    it.copy(
+                        editingMessage = event.message,
+                        inputText = event.message.text,
+                        replyingToMessage = null,
+                        selectedMessageForMenu = null
+                    )
+                }
+            }
+            is ChatUiEvent.CancelEdit -> {
+                _uiState.update { it.copy(editingMessage = null, inputText = "") }
+            }
+            is ChatUiEvent.CopyMessage -> {
+                showToast("Text copied to clipboard")
+                _uiState.update { it.copy(selectedMessageForMenu = null) }
+            }
+            is ChatUiEvent.DeleteMessage -> {
+                _uiState.update { current ->
+                    current.copy(
+                        messages = current.messages.filter { it.id != event.message.id },
+                        selectedMessageForMenu = null,
+                        editingMessage = if (current.editingMessage?.id == event.message.id) null else current.editingMessage,
+                        replyingToMessage = if (current.replyingToMessage?.id == event.message.id) null else current.replyingToMessage
+                    )
+                }
+            }
+            is ChatUiEvent.DismissToast -> {
+                _uiState.update { it.copy(toastMessage = null) }
             }
             is ChatUiEvent.AttachmentClicked -> Unit
             is ChatUiEvent.VoiceRecordClicked -> Unit
@@ -81,13 +120,41 @@ class ChatViewModel : ViewModel() {
         }
     }
 
+    private fun showToast(message: String) {
+        toastJob?.cancel()
+        _uiState.update { it.copy(toastMessage = message) }
+        toastJob = viewModelScope.launch {
+            delay(2500)
+            _uiState.update { it.copy(toastMessage = null) }
+        }
+    }
+
     private fun sendMessage() {
         val currentText = _uiState.value.inputText.trim()
         if (currentText.isEmpty()) return
 
         val state = _uiState.value
-        val replyingTo = state.replyingToMessage
+        val editing = state.editingMessage
 
+        if (editing != null) {
+            _uiState.update { s ->
+                val updated = s.messages.map { msg ->
+                    if (msg.id == editing.id) {
+                        msg.copy(text = currentText, isEdited = true)
+                    } else {
+                        msg
+                    }
+                }
+                s.copy(
+                    messages = updated,
+                    inputText = "",
+                    editingMessage = null
+                )
+            }
+            return
+        }
+
+        val replyingTo = state.replyingToMessage
         val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
         val newMessage = ChatMessageUiModel(
             id = UUID.randomUUID().toString(),
