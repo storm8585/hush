@@ -32,10 +32,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.AnnotatedString
@@ -116,7 +120,7 @@ fun ChatMessageBubble(
     modifier: Modifier = Modifier,
     position: MessageBubblePosition = MessageBubblePosition.Single,
     onSwipeToReply: (ChatMessageUiModel) -> Unit = {},
-    onLongClick: (ChatMessageUiModel) -> Unit = {}
+    onLongClick: (ChatMessageUiModel, Rect) -> Unit = { _, _ -> }
 ) {
     val isOutgoing = message.isOutgoing
 
@@ -151,6 +155,7 @@ fun ChatMessageBubble(
     val offsetX = remember { Animatable(0f) }
     val hapticFeedback = LocalHapticFeedback.current
     var hasTriggeredHaptic by remember { mutableStateOf(false) }
+    var bubbleCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     val thresholdPx = with(LocalDensity.current) { 48.dp.toPx() }
     val maxDragPx = with(LocalDensity.current) { 68.dp.toPx() }
@@ -164,11 +169,15 @@ fun ChatMessageBubble(
                     .graphicsLayer {
                         translationX = offsetX.value
                     }
+                    .onGloballyPositioned { coordinates ->
+                        bubbleCoordinates = coordinates
+                    }
                     .pointerInput(message.id) {
                         detectTapGestures(
                             onLongPress = {
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onLongClick(message)
+                                val bounds = bubbleCoordinates?.boundsInRoot() ?: Rect.Zero
+                                onLongClick(message, bounds)
                             }
                         )
                     }

@@ -70,16 +70,16 @@ class ChatViewModel : ViewModel() {
                 sendMessage()
             }
             is ChatUiEvent.ReplyToMessage -> {
-                _uiState.update { it.copy(replyingToMessage = event.message, selectedMessageForMenu = null) }
+                _uiState.update { it.copy(replyingToMessage = event.message, selectedMessageForMenu = null, selectedMessageBounds = null) }
             }
             is ChatUiEvent.CancelReply -> {
                 _uiState.update { it.copy(replyingToMessage = null) }
             }
             is ChatUiEvent.MessageLongClicked -> {
-                _uiState.update { it.copy(selectedMessageForMenu = event.message) }
+                _uiState.update { it.copy(selectedMessageForMenu = event.message, selectedMessageBounds = event.bounds) }
             }
             is ChatUiEvent.DismissMenu -> {
-                _uiState.update { it.copy(selectedMessageForMenu = null) }
+                _uiState.update { it.copy(selectedMessageForMenu = null, selectedMessageBounds = null) }
             }
             is ChatUiEvent.StartEditMessage -> {
                 _uiState.update {
@@ -87,7 +87,8 @@ class ChatViewModel : ViewModel() {
                         editingMessage = event.message,
                         inputText = event.message.text,
                         replyingToMessage = null,
-                        selectedMessageForMenu = null
+                        selectedMessageForMenu = null,
+                        selectedMessageBounds = null
                     )
                 }
             }
@@ -96,13 +97,14 @@ class ChatViewModel : ViewModel() {
             }
             is ChatUiEvent.CopyMessage -> {
                 showToast("Text copied to clipboard")
-                _uiState.update { it.copy(selectedMessageForMenu = null) }
+                _uiState.update { it.copy(selectedMessageForMenu = null, selectedMessageBounds = null) }
             }
             is ChatUiEvent.DeleteMessage -> {
                 _uiState.update { current ->
                     current.copy(
                         messages = current.messages.filter { it.id != event.message.id },
                         selectedMessageForMenu = null,
+                        selectedMessageBounds = null,
                         editingMessage = if (current.editingMessage?.id == event.message.id) null else current.editingMessage,
                         replyingToMessage = if (current.replyingToMessage?.id == event.message.id) null else current.replyingToMessage
                     )

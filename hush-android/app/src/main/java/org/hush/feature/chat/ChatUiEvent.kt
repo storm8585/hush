@@ -1,5 +1,7 @@
 package org.hush.feature.chat
 
+import androidx.compose.ui.geometry.Rect
+
 sealed interface ChatUiEvent {
     data class InputTextChanged(val text: String) : ChatUiEvent
     data object SendMessage : ChatUiEvent
@@ -11,7 +13,10 @@ sealed interface ChatUiEvent {
     data object BackClicked : ChatUiEvent
     data class ReplyToMessage(val message: ChatMessageUiModel) : ChatUiEvent
     data object CancelReply : ChatUiEvent
-    data class MessageLongClicked(val message: ChatMessageUiModel) : ChatUiEvent
+    data class MessageLongClicked(
+        val message: ChatMessageUiModel,
+        val bounds: Rect = Rect.Zero
+    ) : ChatUiEvent
     data object DismissMenu : ChatUiEvent
     data class StartEditMessage(val message: ChatMessageUiModel) : ChatUiEvent
     data object CancelEdit : ChatUiEvent

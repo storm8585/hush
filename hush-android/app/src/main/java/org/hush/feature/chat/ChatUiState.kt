@@ -1,5 +1,7 @@
 package org.hush.feature.chat
 
+import androidx.compose.ui.geometry.Rect
+
 enum class MessageDeliveryStatus {
     Sending,
     Sent,
@@ -40,6 +42,7 @@ data class ChatUiState(
     val replyingToMessage: ChatMessageUiModel? = null,
     val editingMessage: ChatMessageUiModel? = null,
     val selectedMessageForMenu: ChatMessageUiModel? = null,
+    val selectedMessageBounds: Rect? = null,
     val toastMessage: String? = null
 ) {
     val isSendActionEnabled: Boolean
