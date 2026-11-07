@@ -33,6 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -65,7 +67,7 @@ fun getBubbleShape(
     isOutgoing: Boolean,
     position: MessageBubblePosition
 ): RoundedCornerShape {
-    val large = 20.dp
+    val large = 18.dp
     val small = 4.dp
     return if (isOutgoing) {
         when (position) {
@@ -124,30 +126,30 @@ fun ChatMessageBubble(
 ) {
     val isOutgoing = message.isOutgoing
 
-    val containerColor = if (isOutgoing) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.surfaceContainerHigh
-    }
-
-    val contentColor = if (isOutgoing) {
-        MaterialTheme.colorScheme.onPrimary
-    } else {
-        MaterialTheme.colorScheme.onSurface
-    }
-
-    val timestampColor = if (isOutgoing) {
-        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.72f)
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
+    val contentColor = if (isOutgoing) Color.White else Color.Black
+    val timestampColor = if (isOutgoing) Color.White else Color(0xFF8E8E93)
 
     val bubbleShape = getBubbleShape(isOutgoing, position)
+
+    val bubbleBackgroundModifier = if (isOutgoing) {
+        Modifier.background(
+            Brush.verticalGradient(
+                listOf(
+                    Color(0xFF2499FF),
+                    Color(0xFF4582B8)
+                )
+            )
+        )
+    } else {
+        Modifier.background(Color(0xFFE5E5EA))
+    }
 
     val alignment = if (isOutgoing) Alignment.CenterEnd else Alignment.CenterStart
 
     val textMeasurer = rememberTextMeasurer()
     val messageTextStyle = MaterialTheme.typography.bodyLarge.copy(
+        fontSize = 15.sp,
+        fontWeight = FontWeight.Normal,
         lineHeight = 20.sp
     )
 
@@ -183,8 +185,8 @@ fun ChatMessageBubble(
                     }
                     .widthIn(max = 290.dp)
                     .clip(bubbleShape)
-                    .background(containerColor)
-                    .padding(start = 10.dp, end = 10.dp, top = 7.dp, bottom = 6.dp)
+                    .then(bubbleBackgroundModifier)
+                    .padding(start = 14.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)
             ) {
             Layout(
                 content = {
@@ -279,8 +281,8 @@ fun ChatMessageBubble(
                         Text(
                             text = message.timestamp,
                             style = MaterialTheme.typography.labelSmall.copy(
-                                fontSize = 11.sp,
-                                lineHeight = 11.sp,
+                                fontSize = 12.sp,
+                                lineHeight = 12.sp,
                                 fontWeight = FontWeight.Normal
                             ),
                             color = timestampColor,
@@ -289,7 +291,7 @@ fun ChatMessageBubble(
                         )
 
                         if (isOutgoing) {
-                            Spacer(modifier = Modifier.width(3.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             ChatStatusIndicator(
                                 status = message.status,
                                 tint = timestampColor

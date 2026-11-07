@@ -1,7 +1,6 @@
 package org.hush.feature.chat.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
@@ -30,7 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
@@ -46,8 +45,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
@@ -55,7 +52,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.hush.core.designsystem.theme.InputContainerShape
 import org.hush.feature.chat.ChatMessageUiModel
 
 @Composable
@@ -74,32 +70,6 @@ fun ChatInputBar(
     val isEditMode = editingMessage != null
     val isSendEnabled = inputText.isNotBlank()
     val transition = updateTransition(targetState = isSendEnabled && !isEditMode, label = "send_mic_morph")
-
-    val buttonContainerColor by animateColorAsState(
-        targetValue = if (isSendEnabled) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.primaryContainer
-        },
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "button_container_color"
-    )
-
-    val buttonContentColor by animateColorAsState(
-        targetValue = if (isSendEnabled) {
-            MaterialTheme.colorScheme.onPrimary
-        } else {
-            MaterialTheme.colorScheme.onPrimaryContainer
-        },
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "button_content_color"
-    )
 
     val sendScale by transition.animateFloat(
         transitionSpec = {
@@ -177,33 +147,15 @@ fun ChatInputBar(
     val imePadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
     val bottomInset = maxOf(navBarPadding, imePadding)
 
-    val replyBannerShape = RoundedCornerShape(
-        topStart = 16.dp,
-        topEnd = 16.dp,
-        bottomStart = 0.dp,
-        bottomEnd = 0.dp
-    )
+    val inputCapsuleShape = RoundedCornerShape(25.dp)
 
     Box(
         modifier = modifier.fillMaxWidth()
     ) {
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(
-                    Brush.verticalGradient(
-                        0.0f to Color.Transparent,
-                        0.25f to MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
-                        0.65f to MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-                        1.0f to MaterialTheme.colorScheme.surface
-                    )
-                )
-        )
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = bottomInset)
+                .padding(bottom = maxOf(bottomInset, 8.dp), start = 12.dp, end = 12.dp)
         ) {
             val bannerVisible = replyingToMessage != null || isEditMode
             val bannerTargetMessage = editingMessage ?: replyingToMessage
@@ -218,38 +170,16 @@ fun ChatInputBar(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
-                            .shadow(
-                                elevation = 3.dp,
-                                shape = replyBannerShape,
-                                ambientColor = Color.Black.copy(alpha = 0.04f),
-                                spotColor = Color.Black.copy(alpha = 0.06f)
-                            )
-                            .border(
-                                width = 1.dp,
-                                brush = Brush.verticalGradient(
-                                    listOf(
-                                        Color.White,
-                                        Color(0xFFE4E4EB)
-                                    )
-                                ),
-                                shape = replyBannerShape
-                            )
-                            .clip(replyBannerShape)
-                            .background(
-                                Brush.verticalGradient(
-                                    listOf(
-                                        Color.White,
-                                        Color(0xFFF9F9FB)
-                                    )
-                                )
-                            )
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(1.dp, Color(0xFF8E8E93), RoundedCornerShape(16.dp))
+                            .background(Color.White)
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
                     ) {
                         Box(
                             modifier = Modifier
-                                .width(4.dp)
-                                .height(44.dp)
-                                .background(MaterialTheme.colorScheme.primary)
+                                .width(3.dp)
+                                .height(36.dp)
+                                .background(Color(0xFF0088FF))
                         )
 
                         Spacer(modifier = Modifier.width(10.dp))
@@ -258,33 +188,27 @@ fun ChatInputBar(
                             Icon(
                                 imageVector = Icons.Default.Edit,
                                 contentDescription = "Edit message",
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = Color(0xFF0088FF),
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                         }
 
                         Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(vertical = 6.dp)
+                            modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = if (isEditMode) "Edit Message" else if (bannerTargetMessage.isOutgoing) "You" else "Elena Rostova",
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.primary
-                                ),
+                                text = if (isEditMode) "Edit Message" else if (bannerTargetMessage.isOutgoing) "You" else "thunder",
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 12.sp,
+                                color = Color(0xFF0088FF),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = bannerTargetMessage.text,
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                ),
+                                fontSize = 12.sp,
+                                color = Color(0xFF8E8E93),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -292,188 +216,89 @@ fun ChatInputBar(
 
                         IconButton(
                             onClick = if (isEditMode) onCancelEdit else onCancelReply,
-                            modifier = Modifier.size(36.dp)
+                            modifier = Modifier.size(32.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = if (isEditMode) "Cancel edit" else "Cancel reply",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                contentDescription = "Close",
+                                tint = Color(0xFF8E8E93),
                                 modifier = Modifier.size(18.dp)
                             )
                         }
-
-                        Spacer(modifier = Modifier.width(4.dp))
                     }
+                    Spacer(modifier = Modifier.height(6.dp))
                 }
             }
-
-            Spacer(modifier = Modifier.height(4.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 6.dp)
+                    .height(50.dp)
+                    .clip(inputCapsuleShape)
+                    .border(1.dp, Color(0xFF8E8E93), inputCapsuleShape)
+                    .background(Color.White)
+                    .padding(start = 4.dp, end = 4.dp)
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .shadow(
-                            elevation = 3.dp,
-                            shape = CircleShape,
-                            ambientColor = Color.Black.copy(alpha = 0.04f),
-                            spotColor = Color.Black.copy(alpha = 0.06f)
-                        )
-                        .border(
-                            width = 1.dp,
-                            brush = Brush.verticalGradient(
-                                listOf(
-                                    Color.White,
-                                    Color(0xFFE4E4EB)
-                                )
-                            ),
-                            shape = CircleShape
-                        )
-                        .clip(CircleShape)
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(
-                                    Color.White,
-                                    Color(0xFFF9F9FB)
-                                )
-                            )
-                        )
+                IconButton(
+                    onClick = onAttachmentClick,
+                    modifier = Modifier.size(40.dp)
                 ) {
-                    IconButton(
-                        onClick = onAttachmentClick,
-                        modifier = Modifier.size(44.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Attach file",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.AttachFile,
+                        contentDescription = "Attach file",
+                        tint = Color(0xFF8E8E93),
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
-
-                Spacer(modifier = Modifier.width(8.dp))
 
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .shadow(
-                            elevation = 3.dp,
-                            shape = InputContainerShape,
-                            ambientColor = Color.Black.copy(alpha = 0.04f),
-                            spotColor = Color.Black.copy(alpha = 0.06f)
-                        )
-                        .border(
-                            width = 1.dp,
-                            brush = Brush.verticalGradient(
-                                listOf(
-                                    Color.White,
-                                    Color(0xFFE4E4EB)
-                                )
-                            ),
-                            shape = InputContainerShape
-                        )
-                        .clip(InputContainerShape)
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(
-                                    Color.White,
-                                    Color(0xFFF9F9FB)
-                                )
-                            )
-                        )
-                        .padding(horizontal = 14.dp, vertical = 10.dp)
+                        .padding(horizontal = 6.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Box(
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            if (inputText.isEmpty()) {
-                                Text(
-                                    text = "Message...",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                )
-                            }
-                            BasicTextField(
-                                value = inputText,
-                                onValueChange = onInputTextChanged,
-                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                    color = MaterialTheme.colorScheme.onSurface
-                                ),
-                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                                maxLines = 4,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(6.dp))
-
-                        Icon(
-                            imageVector = Icons.Outlined.EmojiEmotions,
-                            contentDescription = "Emojis",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(22.dp)
+                    if (inputText.isEmpty()) {
+                        Text(
+                            text = "Message",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFF8E8E93)
                         )
                     }
+                    BasicTextField(
+                        value = inputText,
+                        onValueChange = onInputTextChanged,
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFF000000)
+                        ),
+                        cursorBrush = SolidColor(Color(0xFF0088FF)),
+                        maxLines = 4,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.EmojiEmotions,
+                        contentDescription = "Sticker",
+                        tint = Color(0xFF8E8E93),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
 
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .size(48.dp)
-                        .shadow(
-                            elevation = if (isSendEnabled || isEditMode) 5.dp else 2.dp,
-                            shape = CircleShape,
-                            ambientColor = Color.Black.copy(alpha = 0.06f),
-                            spotColor = if (isSendEnabled || isEditMode) MaterialTheme.colorScheme.primary.copy(alpha = 0.40f) else Color.Black.copy(alpha = 0.06f)
-                        )
-                        .border(
-                            width = 1.dp,
-                            brush = Brush.verticalGradient(
-                                if (isSendEnabled || isEditMode) {
-                                    listOf(
-                                        Color.White.copy(alpha = 0.50f),
-                                        Color.White.copy(alpha = 0.05f)
-                                    )
-                                } else {
-                                    listOf(
-                                        Color.White.copy(alpha = 0.85f),
-                                        Color(0xFFE2D6F8)
-                                    )
-                                }
-                            ),
-                            shape = CircleShape
-                        )
+                        .size(42.dp)
                         .clip(CircleShape)
-                        .background(
-                            if (isSendEnabled || isEditMode) {
-                                Brush.verticalGradient(
-                                    listOf(
-                                        Color(0xFF7E60DF),
-                                        Color(0xFF5E3FB5)
-                                    )
-                                )
-                            } else {
-                                Brush.verticalGradient(
-                                    listOf(
-                                        Color(0xFFF3EDFD),
-                                        Color(0xFFE4D4FC)
-                                    )
-                                )
-                            }
-                        )
+                        .background(Color(0xFF0088FF))
                 ) {
                     IconButton(
                         onClick = {
@@ -485,26 +310,26 @@ fun ChatInputBar(
                         },
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = Color.Transparent,
-                            contentColor = buttonContentColor
+                            contentColor = Color.White
                         ),
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(42.dp)
                     ) {
                         Box(
                             contentAlignment = Alignment.Center,
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(42.dp)
                         ) {
                             if (isEditMode) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = "Confirm Edit",
-                                    tint = buttonContentColor,
+                                    tint = Color.White,
                                     modifier = Modifier.size(22.dp)
                                 )
                             } else {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.Send,
                                     contentDescription = "Send Message",
-                                    tint = buttonContentColor,
+                                    tint = Color.White,
                                     modifier = Modifier
                                         .size(20.dp)
                                         .graphicsLayer {
@@ -518,7 +343,7 @@ fun ChatInputBar(
                                 Icon(
                                     imageVector = Icons.Default.Mic,
                                     contentDescription = "Record Voice Message",
-                                    tint = buttonContentColor,
+                                    tint = Color.White,
                                     modifier = Modifier
                                         .size(22.dp)
                                         .graphicsLayer {

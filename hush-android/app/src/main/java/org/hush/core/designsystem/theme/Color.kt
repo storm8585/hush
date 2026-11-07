@@ -4,10 +4,10 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-val PrimaryLight = Color(0xFF6750A4)
+val PrimaryLight = Color(0xFF0088FF)
 val OnPrimaryLight = Color(0xFFFFFFFF)
-val PrimaryContainerLight = Color(0xFFEADDFF)
-val OnPrimaryContainerLight = Color(0xFF21005D)
+val PrimaryContainerLight = Color(0xFFE5E5EA)
+val OnPrimaryContainerLight = Color(0xFF000000)
 
 val SecondaryLight = Color(0xFF625B71)
 val OnSecondaryLight = Color(0xFFFFFFFF)
@@ -24,9 +24,9 @@ val OnErrorLight = Color(0xFFFFFFFF)
 val ErrorContainerLight = Color(0xFFF9DEDC)
 val OnErrorContainerLight = Color(0xFF410E0B)
 
-val SurfaceLight = Color(0xFFFFFFFF)
-val OnSurfaceLight = Color(0xFF1D1B20)
-val OnSurfaceVariantLight = Color(0xFF49454F)
+val SurfaceLight = Color(0xFFF3F3F3)
+val OnSurfaceLight = Color(0xFF000000)
+val OnSurfaceVariantLight = Color(0xFF8E8E93)
 
 val SurfaceContainerLowestLight = Color(0xFFFFFFFF)
 val SurfaceContainerLowLight = Color(0xFFF7F2FA)

@@ -31,8 +31,8 @@ data class RecipientUiModel(
 data class ChatUiState(
     val recipient: RecipientUiModel = RecipientUiModel(
         id = "user_01",
-        name = "Elena Rostova",
-        avatarInitials = "ER",
+        name = "thunder",
+        avatarInitials = "T",
         isOnline = true,
         statusSubtitle = "online"
     ),
