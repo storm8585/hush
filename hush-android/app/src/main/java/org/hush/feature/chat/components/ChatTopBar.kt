@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.hush.feature.chat.RecipientUiModel
 
 @Composable
@@ -59,29 +60,29 @@ fun ChatTopBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .padding(horizontal = 12.dp, vertical = 11.dp)
         ) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(42.dp)
+                    .size(44.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f))
             ) {
                 IconButton(
                     onClick = onBackClick,
-                    modifier = Modifier.size(42.dp)
+                    modifier = Modifier.size(44.dp)
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Navigate back",
                         tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -89,41 +90,29 @@ fun ChatTopBar(
             ) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .size(45.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer)
-                    ) {
-                        Text(
-                            text = recipient.avatarInitials,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                    if (recipient.isOnline) {
-                        Box(
-                            modifier = Modifier
-                                .size(11.dp)
-                                .align(Alignment.BottomEnd)
-                                .clip(CircleShape)
-                                .background(Color(0xFF386A20))
-                        )
-                    }
+                    Text(
+                        text = recipient.avatarInitials,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 17.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 }
 
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Column {
                     Text(
                         text = recipient.name,
                         style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 17.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
@@ -131,7 +120,9 @@ fun ChatTopBar(
                     )
                     Text(
                         text = recipient.statusSubtitle,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 13.sp
+                        ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -150,25 +141,25 @@ fun ChatTopBar(
             ) {
                 IconButton(
                     onClick = onCallClick,
-                    modifier = Modifier.size(38.dp)
+                    modifier = Modifier.size(42.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Call,
                         contentDescription = "Voice Call",
                         tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(19.dp)
+                        modifier = Modifier.size(21.dp)
                     )
                 }
 
                 IconButton(
                     onClick = onMoreOptionsClick,
-                    modifier = Modifier.size(38.dp)
+                    modifier = Modifier.size(42.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = "More Options",
                         tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(19.dp)
+                        modifier = Modifier.size(21.dp)
                     )
                 }
             }

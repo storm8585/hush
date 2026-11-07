@@ -75,7 +75,7 @@ fun ChatScreen(
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     end = 16.dp,
-                    top = statusBarHeight + 68.dp,
+                    top = statusBarHeight + 74.dp,
                     bottom = navBarHeight + 76.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(4.dp),

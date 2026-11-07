@@ -178,19 +178,27 @@ fun ChatInputBar(
                 .padding(bottom = bottomInset)
                 .padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
-            IconButton(
-                onClick = onAttachmentClick,
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                ),
-                modifier = Modifier.size(44.dp)
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceContainerLowest)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Attach file",
-                    modifier = Modifier.size(24.dp)
-                )
+                IconButton(
+                    onClick = onAttachmentClick,
+                    modifier = Modifier.size(44.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Attach file",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
+
+            Spacer(modifier = Modifier.width(8.dp))
 
             Box(
                 modifier = Modifier

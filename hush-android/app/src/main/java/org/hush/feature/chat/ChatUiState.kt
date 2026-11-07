@@ -29,7 +29,7 @@ data class ChatUiState(
         name = "Elena Rostova",
         avatarInitials = "ER",
         isOnline = true,
-        statusSubtitle = "Active now"
+        statusSubtitle = "online"
     ),
     val messages: List<ChatMessageUiModel> = emptyList(),
     val inputText: String = "",
